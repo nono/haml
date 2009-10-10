@@ -135,7 +135,10 @@ MESSAGE
     def preserve(input = '', &block)
       return preserve(capture_haml(&block)) if block
 
-      input.chomp("\n").gsub(/\n/, '&#x000A;').gsub(/\r/, '')
+      safe = input.respond_to?(:html_safe?) && input.html_safe?
+      ret = input.chomp("\n").gsub(/\n/, '&#x000A;').gsub(/\r/, '')
+      ret.html_safe! if safe
+      ret
     end
     alias_method :flatten, :preserve
 
