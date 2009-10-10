@@ -318,7 +318,7 @@ MESSAGE
     # @yieldparam args [Array] `args`
     def capture_haml(*args, &block)
       buffer = eval('_hamlout', block.binding) rescue haml_buffer
-      with_haml_buffer(buffer) do
+      text = with_haml_buffer(buffer) do
         position = haml_buffer.buffer.length
 
         haml_buffer.capture_position = position
@@ -337,6 +337,8 @@ MESSAGE
           line[min_tabs..-1]
         end.join
       end
+      text.html_safe! if text.respond_to?(:html_safe!)
+      text
     ensure
       haml_buffer.capture_position = nil
     end
@@ -473,7 +475,11 @@ END
     # @param text [String] The string to sanitize
     # @return [String] The sanitized string
     def html_escape(text)
-      text.to_s.gsub(/[\"><&]/) { |s| HTML_ESCAPE[s] }
+      unless text.respond_to?(:html_safe?) && text.html_safe?
+        text = text.to_s.gsub(/[\"><&]/) { |s| HTML_ESCAPE[s] }
+        text.html_safe! if text.respond_to?(:html_safe!)
+      end
+      text
     end
 
     # Escapes HTML entities in `text`, but without escaping an ampersand
@@ -482,7 +488,11 @@ END
     # @param text [String] The string to sanitize
     # @return [String] The sanitized string
     def escape_once(text)
-      text.to_s.gsub(/[\"><]|&(?!([a-zA-Z]+|(#\d+));)/) { |s| HTML_ESCAPE[s] }
+      unless text.respond_to?(:html_safe?) && text.html_safe?
+        text = text.to_s.gsub(/[\"><]|&(?!([a-zA-Z]+|(#\d+));)/) { |s| HTML_ESCAPE[s] }
+        text.html_safe! if text.respond_to?(:html_safe!)
+      end
+      text
     end
 
     # Returns whether or not the current template is a Haml template.

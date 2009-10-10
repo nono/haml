@@ -99,6 +99,7 @@ __in_erb_template = true
 END
       postamble = <<END.gsub("\n", ";")
 @haml_buffer = @haml_buffer.upper
+_erbout.html_safe! if _erbout.respond_to?(:html_safe!)
 _erbout
 END
       preamble + locals_code(local_names) + precompiled + postamble
